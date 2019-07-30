@@ -19,6 +19,10 @@ class Gui(QtWidgets.QMainWindow):
         self.ui = Ui_mainWindow()
         self.ui.setupUi(self)
 
+        # Setup listeners
+        self.ui.clear_button.clicked.connect(self.clear_database)
+        self.ui.quit_button.clicked.connect(self.quit)
+
         # Open sql database
         self.database = Database(self.ui)
 
@@ -36,6 +40,11 @@ class Gui(QtWidgets.QMainWindow):
 
         self.database.clear_database()
 
+    def quit(self):
+
+        self.close_database()
+        app.quit()
+
 
 app = QtWidgets.QApplication([])
 
@@ -46,11 +55,5 @@ gui.show()
 # Run main loop
 app.exec()
 
-# Clear database so we can test
-gui.clear_database()
-
-# Close database
-gui.close_database()
-
-print('Quit')
+print('Quit...')
 sys.exit()
