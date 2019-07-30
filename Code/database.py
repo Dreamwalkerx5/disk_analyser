@@ -87,22 +87,23 @@ class Database:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
 
-    def create_new_entry(self, parent=None, directory=False, name='', file_type='', size=0,
-                         created='', modified='', accessed='', read_only=False, hidden=False):
+    def create_new_entry(self, record=None):
 
         pass
 
     def get_entry(self, entry_id=0):
 
-        text = ''
+        record = Record(entry_id=0, parent=None, directory=True, name='root', file_type='', size=0,
+                        created='30/06/2019', modified='30/06/2019', accessed='30/06/2019',
+                        read_only=False, hidden=False)
 
-        return text
+        return record
+
 
 class Record:
 
     def __init__(self, entry_id=0, parent=None, directory=False, name='', file_type='', size=0,
                  created='', modified='', accessed='', read_only=False, hidden=False):
-
         self.entry_id = entry_id
         self.parent = parent
         self.directory = directory
@@ -116,16 +117,10 @@ class Record:
         self.hidden = hidden
 
     def entry_id(self):
-
         return self.entry_id()
 
     def parent(self):
-
         return self.parent()
 
     def directory(self):
-
         return self.directory()
-
-
-

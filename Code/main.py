@@ -6,6 +6,7 @@ import time
 
 from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
+from Code.crawler import Crawler
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 
@@ -39,6 +40,10 @@ class Gui(QtWidgets.QMainWindow):
     def clear_database(self):
 
         self.database.clear_database()
+
+    def crawler(self):
+
+        Crawler.crawl_disk(self.ui, self.database)
 
     def quit(self):
 
