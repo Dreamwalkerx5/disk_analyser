@@ -64,9 +64,68 @@ class Database:
     @staticmethod
     def create_new_database(db):
 
-        c = db.cursor()
-        c.execute('''CREATE TABLE DiskTree(id INTEGER PRIMARY KEY, created TIMESTAMP, category TEXT, entry TEXT)''')
-        db.commit()
+        try:
 
-        print("New database created.")
+            c = db.cursor()
+            c.execute('''CREATE TABLE DiskTree(id INTEGER PRIMARY KEY, 
+                      Parent INTEGER,
+                      Directory BOOL, 
+                      Name TEXT, 
+                      Type TEXT,
+                      Size INTEGER,
+                      Created,
+                      Modified,
+                      Accessed,
+                      Read_only BOOL,
+                      Hidden BOOL)''')
+            db.commit()
+
+            print("New database created.")
+
+        except:
+
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])
+
+    def create_new_entry(self, parent=None, directory=False, name='', file_type='', size=0,
+                         created='', modified='', accessed='', read_only=False, hidden=False):
+
+        pass
+
+    def get_entry(self, entry_id=0):
+
+        text = ''
+
+        return text
+
+class Record:
+
+    def __init__(self, entry_id=0, parent=None, directory=False, name='', file_type='', size=0,
+                 created='', modified='', accessed='', read_only=False, hidden=False):
+
+        self.entry_id = entry_id
+        self.parent = parent
+        self.directory = directory
+        self.name = name
+        self.file_type = file_type
+        self.size = size
+        self.created = created
+        self.accessed = accessed
+        self.modified = modified
+        self.read_only = read_only
+        self.hidden = hidden
+
+    def entry_id(self):
+
+        return self.entry_id()
+
+    def parent(self):
+
+        return self.parent()
+
+    def directory(self):
+
+        return self.directory()
+
+
 

@@ -5,7 +5,7 @@ import sys
 import time
 
 from Code.gui import Ui_mainWindow
-from Code.database import Database
+from Code.database import Database, Record
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 
@@ -44,6 +44,11 @@ class Gui(QtWidgets.QMainWindow):
 
         self.close_database()
         app.quit()
+
+
+record = Record(entry_id=0, parent=None, directory=True, name='root', file_type='', size=0,
+                created='30/06/2019', modified='30/06/2019', accessed='30/06/2019',
+                read_only=False, hidden=False)
 
 
 app = QtWidgets.QApplication([])
