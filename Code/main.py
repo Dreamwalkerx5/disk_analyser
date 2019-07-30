@@ -4,6 +4,8 @@ import datetime
 import sys
 import time
 
+from gui import Ui_mainWindow
+
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 
@@ -11,6 +13,9 @@ class Gui(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(Gui, self).__init__()
+
+        self.ui =
+        self.ui.setupUi(self)
 
     def clock_thread(self):
         while True:
