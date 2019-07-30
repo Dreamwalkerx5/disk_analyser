@@ -5,7 +5,7 @@ import sys
 class Database:
 
     def __init__(self, gui):
-        self.db = self.open_database()
+        self.db = self.open_database(gui)
         self.gui = gui
 
     def clear_database(self):
@@ -19,6 +19,7 @@ class Database:
             # Create new database
             Database.create_new_database(self.db)
             self.gui.info_label.setText('Database has been cleared.')
+            print('Database cleared')
 
         except:
 
@@ -28,24 +29,37 @@ class Database:
     @staticmethod
     def open_database(gui):
 
-        # open a connection to sqlite3
-        db = sqlite3.connect('Disk.db')
+        try:
+            # open a connection to sqlite3
+            db = sqlite3.connect('Disk.db')
 
-        # check if database exists
-        c = db.cursor()
-        c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='DiskTree' ''')
-        if not c.fetchone()[0]:
+            # check if database exists
+            c = db.cursor()
+            c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='DiskTree' ''')
+            if not c.fetchone()[0]:
 
-            Database.create_new_database(db)
-            gui.info_label.setText('Database created and a connection made.')
+                Database.create_new_database(db)
+                gui.info_label.setText('New database created and a connection made.')
+                print('New database created')
 
-        else:
+            else:
 
-            gui.info_label.setText('Database found and a connection made.')
+                gui.info_label.setText('Database found and a connection made.')
+                print('Database found and opened')
 
-        db.commit()
+            db.commit()
 
-        return db
+            return db
+
+        except:
+
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])
+
+    def close_database(self):
+
+        self.db.close()
+        print('Database closed')
 
     @staticmethod
     def create_new_database(db):
