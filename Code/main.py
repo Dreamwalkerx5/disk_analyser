@@ -1,7 +1,8 @@
 # Disk Analyser v1.0
 # Copyright (c) 2019 Steven Taylor All rights reserved
-import datetime
+from datetime import datetime
 import sys
+import threading
 import time
 
 from Code.gui import Ui_mainWindow
@@ -25,10 +26,18 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.quit_button.clicked.connect(self.quit)
         self.ui.crawl_button.clicked.connect(self.crawler)
 
+        # Start clock thread and make it daemon so it shuts down when the app closes
+        self.clock = threading.Thread(target=self.clock_thread, daemon=True)
+        self.clock.start()
+
         # Open sql database
         self.database = Database(self.ui)
 
-        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser/Code"
+        # create model for the listview
+        self.model = QtGui.QStandardItemModel(self.ui.listView)
+        self.ui.listView.setModel(self.model)
+
+        self.current_root = "C:/"
 
     def clock_thread(self):
         while True:
@@ -46,7 +55,7 @@ class Gui(QtWidgets.QMainWindow):
 
     def crawler(self):
 
-        Crawler.crawl_disk(self.ui, self.database, self.current_root)
+        Crawler.crawl_disk(self, self.ui, self.database, self.current_root)
 
     def quit(self):
 
