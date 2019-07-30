@@ -38,7 +38,7 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
         self.create_view()
 
-        self.current_root = "C:/"
+        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser/Code"
 
     def clock_thread(self):
         while True:
@@ -53,19 +53,22 @@ class Gui(QtWidgets.QMainWindow):
     def clear_database(self):
 
         self.database.clear_database()
+        self.create_view()
 
     def crawler(self):
 
-        Crawler.crawl_disk(self, self.ui, self.database, self.current_root)
+        self.clear_database()
+        Crawler.crawl_disk(self, self.ui, self.database, self.current_root, 0)
         self.create_view()
 
     def create_view(self):
 
+        self.model.clear()
         records = self.database.get_all()
 
         for temp_record in records:
 
-            item = QtGui.QStandardItem(temp_record.name + ' ' + temp_record.created)
+            item = QtGui.QStandardItem(f'{temp_record.parent}\t{temp_record.name}\t\t {temp_record.created}')
             self.model.appendRow(item)
 
     def quit(self):

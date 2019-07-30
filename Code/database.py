@@ -7,6 +7,7 @@ class Database:
     def __init__(self, gui):
         self.db = self.open_database(gui)
         self.gui = gui
+        self.id_count = 0
 
     def clear_database(self):
 
@@ -17,6 +18,7 @@ class Database:
             self.db.commit()
 
             # Create new database
+            self.id_count = 0
             Database.create_new_database(self.db)
             self.gui.info_label.setText('Database has been cleared.')
             print('Database cleared')
@@ -67,7 +69,7 @@ class Database:
         try:
 
             c = db.cursor()
-            c.execute('''CREATE TABLE DiskTree(id INTEGER PRIMARY KEY, 
+            c.execute('''CREATE TABLE DiskTree(Id INTEGER PRIMARY KEY, 
                       Parent INTEGER,
                       Directory BOOL, 
                       Name TEXT, 
@@ -91,14 +93,16 @@ class Database:
 
         c = self.db.cursor()
 
-        entry = (record.parent, record.directory, record.name, record.file_type
+        entry = (self.id_count, record.parent, record.directory, record.name, record.file_type
                  , record.size, record.created, record.modified, record.accessed
                  , record.read_only, record.hidden, )
 
-        c.execute('''INSERT INTO DiskTree(Parent, Directory, Name, Type, Size, Created, Modified, 
-                  accessed, Read_only, Hidden) VALUES(?,?,?,?,?,?,?,?,?,?)''', entry)
+        c.execute('''INSERT INTO DiskTree(Id, Parent, Directory, Name, Type, Size, Created, Modified, 
+                  accessed, Read_only, Hidden) VALUES(?,?,?,?,?,?,?,?,?,?,?)''', entry)
 
         self.db.commit()
+
+        self.id_count += 1
 
     def get_entry(self, entry_id=1):
 
@@ -106,7 +110,7 @@ class Database:
 
             c = self.db.cursor()
 
-            c.execute('SELECT * FROM DiskTree WHERE id=?', (entry_id,))
+            c.execute('SELECT * FROM DiskTree WHERE Id=?', (entry_id,))
 
             result = c.fetchone()
             print(result[3])
@@ -121,18 +125,18 @@ class Database:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
 
-    def get_all(self):
+    def get_all(self, parent=6):
 
         try:
 
             records = []
             c = self.db.cursor()
 
-            c.execute('SELECT * FROM DiskTree ORDER BY id')
+            c.execute('SELECT * FROM DiskTree WHERE Parent= ? ORDER BY Id', (parent,))
 
             for row in c:
 
-                record = Record(entry_id=row[0], parent=None, directory=True, name=row[3], file_type='', size=0,
+                record = Record(entry_id=row[0], parent=row[1], directory=True, name=row[3], file_type='', size=0,
                                 created=row[6], modified='30/06/2019', accessed='30/06/2019',
                                 read_only=False, hidden=False)
 

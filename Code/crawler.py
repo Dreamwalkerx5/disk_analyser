@@ -10,14 +10,11 @@ from Code.database import Record
 class Crawler:
 
     @staticmethod
-    def crawl_disk(gui, ui, database, root):
+    def crawl_disk(gui, ui, database, root, parent):
 
         ui.info_label.setText('Crawling disk...')
 
         try:
-
-            # Clear listview model
-            gui.model.clear()
 
             entries = Path(root)
             for entry in entries.iterdir():
@@ -42,11 +39,17 @@ class Crawler:
                 accessed = Crawler.convert_date(info.st_atime) + ' ' + \
                            Crawler.convert_time(info.st_atime)
 
-                record = Record(parent=0, directory=directory, name=name, file_type='',
+                record = Record(parent=parent, directory=directory, name=name, file_type='',
                                 size=file_size, created=created, modified=modified,
                                 accessed=accessed, read_only=False, hidden=False)
 
                 database.create_new_entry(record)
+
+                if entry.is_dir():
+
+                    new_root = root + '/' + name
+                    Crawler.crawl_disk(gui, ui, database, new_root, database.id_count - 1)
+
 
             ui.info_label.setText('Disk crawled...')
 
