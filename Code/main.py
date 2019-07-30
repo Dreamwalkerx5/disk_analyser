@@ -23,9 +23,12 @@ class Gui(QtWidgets.QMainWindow):
         # Setup listeners
         self.ui.clear_button.clicked.connect(self.clear_database)
         self.ui.quit_button.clicked.connect(self.quit)
+        self.ui.crawl_button.clicked.connect(self.crawler)
 
         # Open sql database
         self.database = Database(self.ui)
+
+        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser/Code"
 
     def clock_thread(self):
         while True:
@@ -43,7 +46,7 @@ class Gui(QtWidgets.QMainWindow):
 
     def crawler(self):
 
-        Crawler.crawl_disk(self.ui, self.database)
+        Crawler.crawl_disk(self.ui, self.database, self.current_root)
 
     def quit(self):
 
