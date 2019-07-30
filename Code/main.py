@@ -36,6 +36,7 @@ class Gui(QtWidgets.QMainWindow):
         # create model for the listview
         self.model = QtGui.QStandardItemModel(self.ui.listView)
         self.ui.listView.setModel(self.model)
+        self.create_view()
 
         self.current_root = "C:/"
 
@@ -56,6 +57,16 @@ class Gui(QtWidgets.QMainWindow):
     def crawler(self):
 
         Crawler.crawl_disk(self, self.ui, self.database, self.current_root)
+        self.create_view()
+
+    def create_view(self):
+
+        records = self.database.get_all()
+
+        for temp_record in records:
+
+            item = QtGui.QStandardItem(temp_record.name + ' ' + temp_record.created)
+            self.model.appendRow(item)
 
     def quit(self):
 

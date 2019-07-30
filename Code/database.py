@@ -89,15 +89,61 @@ class Database:
 
     def create_new_entry(self, record=None):
 
-        pass
+        c = self.db.cursor()
 
-    def get_entry(self, entry_id=0):
+        entry = (record.parent, record.directory, record.name, record.file_type
+                 , record.size, record.created, record.modified, record.accessed
+                 , record.read_only, record.hidden, )
 
-        record = Record(entry_id=0, parent=None, directory=True, name='root', file_type='', size=0,
-                        created='30/06/2019', modified='30/06/2019', accessed='30/06/2019',
-                        read_only=False, hidden=False)
+        c.execute('''INSERT INTO DiskTree(Parent, Directory, Name, Type, Size, Created, Modified, 
+                  accessed, Read_only, Hidden) VALUES(?,?,?,?,?,?,?,?,?,?)''', entry)
 
-        return record
+        self.db.commit()
+
+    def get_entry(self, entry_id=1):
+
+        try:
+
+            c = self.db.cursor()
+
+            c.execute('SELECT * FROM DiskTree WHERE id=?', (entry_id,))
+
+            result = c.fetchone()
+            print(result[3])
+            record = Record(entry_id=0, parent=None, directory=True, name=result[3], file_type='', size=0,
+                            created='30/06/2019', modified='30/06/2019', accessed='30/06/2019',
+                            read_only=False, hidden=False)
+
+            return record
+
+        except:
+
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])
+
+    def get_all(self):
+
+        try:
+
+            records = []
+            c = self.db.cursor()
+
+            c.execute('SELECT * FROM DiskTree ORDER BY id')
+
+            for row in c:
+
+                record = Record(entry_id=row[0], parent=None, directory=True, name=row[3], file_type='', size=0,
+                                created=row[6], modified='30/06/2019', accessed='30/06/2019',
+                                read_only=False, hidden=False)
+
+                records.append(record)
+
+            return records
+
+        except:
+
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])
 
 
 class Record:
@@ -117,10 +163,35 @@ class Record:
         self.hidden = hidden
 
     def entry_id(self):
-        return self.entry_id()
+
+        return self.entry_id
 
     def parent(self):
-        return self.parent()
+        return self.parent
 
     def directory(self):
-        return self.directory()
+        return self.directory
+
+    def name(self):
+        return self.name
+
+    def file_type(self):
+        return self.file_type
+
+    def size(self):
+        return self.size
+
+    def created(self):
+        return self.created
+
+    def accessed(self):
+        return self.accessed
+
+    def modified(self):
+        return self.modified
+
+    def read_only(self):
+        return self.read_only
+
+    def hidden(self):
+        return self.hidden

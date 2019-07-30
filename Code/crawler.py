@@ -42,14 +42,11 @@ class Crawler:
                 accessed = Crawler.convert_date(info.st_atime) + ' ' + \
                            Crawler.convert_time(info.st_atime)
 
-                record = Record(parent=root, directory=directory, name=name, file_type='',
+                record = Record(parent=0, directory=directory, name=name, file_type='',
                                 size=file_size, created=created, modified=modified,
                                 accessed=accessed, read_only=False, hidden=False)
 
                 database.create_new_entry(record)
-
-                # item = QtGui.QStandardItem(record.created + ' ' + str(record.size))
-                # gui.model.appendRow(item)
 
             ui.info_label.setText('Disk crawled...')
 
