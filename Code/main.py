@@ -41,10 +41,12 @@ class Gui(QtWidgets.QMainWindow):
         # Set up some variables
         self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
         self.current_parent = 0
+        self.previous_parent = 0
         self.display_index = []
         self.crawler_thread = None
 
         # Create initial display
+        self.ui.info_label.setText('Welcome to Disk Analyser v1.0')
         self.create_view()
 
     def clock_thread(self):
@@ -53,14 +55,35 @@ class Gui(QtWidgets.QMainWindow):
             self.ui.time_label.setText(current_time[11:19])
             time.sleep(1)
 
+    def crawler_monitor(self, *args):
+
+        thread = args[0]
+        self.ui.info_label.setText('Crawling disk...')
+
+        while thread.crawler_thread.isAlive():
+
+            time.sleep(1)
+
+        self.ui.info_label.setText('Crawling finished.')
+        self.create_view()
+
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def item_selected(self, index):
 
         selection = self.display_index[index.row()]
-        record = self.database.get_entry(selection)
-        if record.directory:
-            self.current_parent = selection
-            print(record.directory)
+        if index.row() == 0:
+
+           record = self.database.get_entry(self.current_parent)
+           self.current_parent = record.parent
+
+        else:
+
+            record = self.database.get_entry(selection)
+
+            if record.directory:
+
+                self.current_parent = selection
+                print(record.directory)
 
         self.create_view()
 
@@ -78,14 +101,22 @@ class Gui(QtWidgets.QMainWindow):
         self.clear_database()
         self.crawler_thread = Crawler()
         self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root, parent=0)
-        # self.create_view()
+
+        # Wait for crawler to finish and then update display
+        monitor = threading.Thread(target=self.crawler_monitor, args=(self.crawler_thread,), daemon=True)
+        monitor.start()
 
     def create_view(self):
 
         self.model.clear()
         self.display_index.clear()
+        # Get new instance of database in case we are running in a different thread
+        temp_database = Database(self.ui)
 
-        records = self.database.get_all(parent=self.current_parent)
+        records = temp_database.get_all(parent=self.current_parent)
+        # Set parent as first item
+        self.display_index.append(0)
+        self.model.appendRow(QtGui.QStandardItem('...'))
 
         for temp_record in records:
 
