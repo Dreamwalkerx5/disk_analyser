@@ -1,4 +1,4 @@
-import sys
+import sys, time
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -6,22 +6,32 @@ from pathlib import Path
 from PyQt5 import QtGui
 
 from Code.database import Record
+from Code.database import Database
 
 
 class Crawler:
 
-    @staticmethod
-    def crawl_disk(gui, ui, database, root, parent):
+    def __init__(self):
 
-        ui.info_label.setText('Crawling disk...')
+        self.crawler_thread = None
+
+    def crawl_disk(self, ui=None, database=None, root=None, parent=None):
+
+        # ui.info_label.setText('Crawling disk...')
 
         # Start crawler thread
-        crawler_thread = threading.Thread(target=Crawler.do_crawl(gui, ui, database, root, parent))
-        crawler_thread.start()
-        return crawler_thread
+        self.crawler_thread = threading.Thread(target=self.do_crawl,
+                                               args=(ui, database, root, parent,), daemon=True)
+        self.crawler_thread.start()
 
-    @staticmethod
-    def do_crawl(gui, ui, database, root, parent):
+    def do_crawl(self, *args):
+
+        ui = args[0]
+        database = args[1]
+        root = args[2]
+        parent = args[3]
+
+        database = Database(ui)
 
         try:
 
@@ -56,7 +66,9 @@ class Crawler:
 
                 if entry.is_dir():
                     new_root = root + '/' + name
-                    Crawler.crawl_disk(gui, ui, database, new_root, database.id_count - 1)
+                    self.crawl_disk(ui, database, new_root, database.id_count - 1)
+
+                time.sleep(0)
 
         except:
 

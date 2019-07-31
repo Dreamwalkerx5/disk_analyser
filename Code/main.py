@@ -76,8 +76,9 @@ class Gui(QtWidgets.QMainWindow):
     def crawler(self):
 
         self.clear_database()
-        self.crawler_thread = Crawler.crawl_disk(self, self.ui, self.database, self.current_root, 0)
-        self.create_view()
+        self.crawler_thread = Crawler()
+        self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root, parent=0)
+        # self.create_view()
 
     def create_view(self):
 

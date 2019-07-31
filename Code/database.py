@@ -1,13 +1,17 @@
 import sqlite3
 import sys
+import threading
 
 
 class Database:
 
+    id_count = 0
+    lock = threading.Lock()
+
     def __init__(self, gui):
         self.db = self.open_database(gui)
         self.gui = gui
-        self.id_count = 0
+        # self.id_count = 0
 
     def clear_database(self):
 
@@ -18,7 +22,7 @@ class Database:
             self.db.commit()
 
             # Create new database
-            self.id_count = 0
+            Database.id_count = 0
             Database.create_new_database(self.db)
             self.gui.info_label.setText('Database has been cleared.')
             print('Database cleared')
@@ -91,6 +95,9 @@ class Database:
 
     def create_new_entry(self, record=None):
 
+        # Acquire thread lock
+        Database.lock.acquire()
+
         c = self.db.cursor()
 
         entry = (self.id_count, record.parent, record.directory, record.name, record.file_type
@@ -102,7 +109,10 @@ class Database:
 
         self.db.commit()
 
-        self.id_count += 1
+        Database.id_count += 1
+
+        # Release thread lock
+        Database.lock.release()
 
     def get_entry(self, entry_id=1):
 
