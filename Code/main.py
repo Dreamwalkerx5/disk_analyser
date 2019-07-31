@@ -25,6 +25,7 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.clear_button.clicked.connect(self.clear_database)
         self.ui.quit_button.clicked.connect(self.quit)
         self.ui.crawl_button.clicked.connect(self.crawler)
+        self.ui.listView.clicked.connect(self.item_selected)
 
         # Start clock thread and make it daemon so it shuts down when the app closes
         self.clock = threading.Thread(target=self.clock_thread, daemon=True)
@@ -36,15 +37,32 @@ class Gui(QtWidgets.QMainWindow):
         # create model for the listview
         self.model = QtGui.QStandardItemModel(self.ui.listView)
         self.ui.listView.setModel(self.model)
-        self.create_view()
 
-        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser/Code"
+        # Set up some variables
+        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        self.current_parent = 0
+        self.display_index = []
+        self.crawler_thread = None
+
+        # Create initial display
+        self.create_view()
 
     def clock_thread(self):
         while True:
             current_time = str(datetime.now())
             self.ui.time_label.setText(current_time[11:19])
             time.sleep(1)
+
+    @QtCore.pyqtSlot(QtCore.QModelIndex)
+    def item_selected(self, index):
+
+        selection = self.display_index[index.row()]
+        record = self.database.get_entry(selection)
+        if record.directory:
+            self.current_parent = selection
+            print(record.directory)
+
+        self.create_view()
 
     def close_database(self):
 
@@ -58,17 +76,26 @@ class Gui(QtWidgets.QMainWindow):
     def crawler(self):
 
         self.clear_database()
-        Crawler.crawl_disk(self, self.ui, self.database, self.current_root, 0)
+        self.crawler_thread = Crawler.crawl_disk(self, self.ui, self.database, self.current_root, 0)
         self.create_view()
 
     def create_view(self):
 
         self.model.clear()
-        records = self.database.get_all()
+        self.display_index.clear()
+
+        records = self.database.get_all(parent=self.current_parent)
 
         for temp_record in records:
 
-            item = QtGui.QStandardItem(f'{temp_record.parent}\t{temp_record.name}\t\t {temp_record.created}')
+            temp_string = ''
+            temp_string += f'{temp_record.parent}  '
+            if temp_record.directory:
+                temp_string += '*'
+            temp_string += f'{temp_record.name}\t\t{(temp_record.size / 1024)}K'
+
+            self.display_index.append(temp_record.entry_id)
+            item = QtGui.QStandardItem(temp_string)
             self.model.appendRow(item)
 
     def quit(self):

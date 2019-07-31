@@ -112,11 +112,11 @@ class Database:
 
             c.execute('SELECT * FROM DiskTree WHERE Id=?', (entry_id,))
 
-            result = c.fetchone()
-            print(result[3])
-            record = Record(entry_id=0, parent=None, directory=True, name=result[3], file_type='', size=0,
-                            created='30/06/2019', modified='30/06/2019', accessed='30/06/2019',
-                            read_only=False, hidden=False)
+            row = c.fetchone()
+
+            record = Record(entry_id=row[0], parent=row[1], directory=row[2], name=row[3], file_type=row[4],
+                            size=row[5], created=row[6], modified=row[7], accessed=row[8],
+                            read_only=row[9], hidden=row[10])
 
             return record
 
@@ -125,7 +125,7 @@ class Database:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
 
-    def get_all(self, parent=6):
+    def get_all(self, parent=0):
 
         try:
 
@@ -136,9 +136,10 @@ class Database:
 
             for row in c:
 
-                record = Record(entry_id=row[0], parent=row[1], directory=True, name=row[3], file_type='', size=0,
-                                created=row[6], modified='30/06/2019', accessed='30/06/2019',
-                                read_only=False, hidden=False)
+                record = Record(entry_id=row[0], parent=row[1], directory=row[2], name=row[3], file_type=row[4],
+                                size=row[5],
+                                created=row[6], modified=row[7], accessed=row[8],
+                                read_only=row[9], hidden=row[10])
 
                 records.append(record)
 

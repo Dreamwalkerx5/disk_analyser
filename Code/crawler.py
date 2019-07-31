@@ -1,4 +1,5 @@
 import sys
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -13,6 +14,14 @@ class Crawler:
     def crawl_disk(gui, ui, database, root, parent):
 
         ui.info_label.setText('Crawling disk...')
+
+        # Start crawler thread
+        crawler_thread = threading.Thread(target=Crawler.do_crawl(gui, ui, database, root, parent))
+        crawler_thread.start()
+        return crawler_thread
+
+    @staticmethod
+    def do_crawl(gui, ui, database, root, parent):
 
         try:
 
@@ -46,12 +55,8 @@ class Crawler:
                 database.create_new_entry(record)
 
                 if entry.is_dir():
-
                     new_root = root + '/' + name
                     Crawler.crawl_disk(gui, ui, database, new_root, database.id_count - 1)
-
-
-            ui.info_label.setText('Disk crawled...')
 
         except:
 
