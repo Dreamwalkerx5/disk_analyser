@@ -1,5 +1,6 @@
 # Disk Analyser v1.0
 # Copyright (c) 2019 Steven Taylor All rights reserved
+import os
 from datetime import datetime
 import sys
 import threading
@@ -26,6 +27,7 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.quit_button.clicked.connect(self.quit)
         self.ui.crawl_button.clicked.connect(self.crawler)
         self.ui.listView.clicked.connect(self.item_selected)
+        self.ui.count_button.clicked.connect(self.file_counter)
 
         # Start clock thread and make it daemon so it shuts down when the app closes
         self.clock = threading.Thread(target=self.clock_thread, daemon=True)
@@ -67,6 +69,19 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.info_label.setText('Crawling finished.')
         self.create_view()
 
+    def file_counter(self):
+
+        try:
+
+            cpt = sum([len(files) for root, dirs, files in os.walk(self.current_root)])
+            self.ui.info_label.setText('Total files: ' + str(cpt))
+            return cpt
+
+        except:
+
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])
+
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def item_selected(self, index):
 
@@ -99,8 +114,11 @@ class Gui(QtWidgets.QMainWindow):
     def crawler(self):
 
         self.clear_database()
+
+        total_files = self.file_counter()
         self.crawler_thread = Crawler()
-        self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root, parent=0)
+        self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root,
+                                       parent=0, total_files=total_files)
 
         # Wait for crawler to finish and then update display
         monitor = threading.Thread(target=self.crawler_monitor, args=(self.crawler_thread,), daemon=True)

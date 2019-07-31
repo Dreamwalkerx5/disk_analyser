@@ -1,3 +1,4 @@
+import queue
 import sys, time
 import threading
 from datetime import datetime
@@ -14,15 +15,49 @@ class Crawler:
     def __init__(self):
 
         self.crawler_thread = None
+        self.progress_thread = None
+        self.total_files = 0
+        self.current_files = 0
+        self.comms = queue.Queue()
+        self.ui = None
 
-    def crawl_disk(self, ui=None, database=None, root=None, parent=None):
+    def crawl_disk(self, ui=None, database=None, root=None, parent=None, total_files=0):
 
-        # ui.info_label.setText('Crawling disk...')
+        self.total_files = total_files
+        self.ui = ui
 
         # Start crawler thread
         self.crawler_thread = threading.Thread(target=self.do_crawl,
-                                               args=(ui, database, root, parent,), daemon=True)
+                                               args=(ui, database, root, parent, self.comms)
+                                               , daemon=True)
         self.crawler_thread.start()
+
+        self.progress_thread = threading.Thread(target=self.progress_bar, args=(self.comms,
+                                                self.total_files, ),
+                                                daemon=True)
+        self.progress_thread.start()
+
+    def progress_bar(self, *args):
+
+        comms = args[0]
+        total_files = args[1]
+
+        while total_files > self.current_files:
+
+            try:
+
+                count = comms.get(True)
+                self.current_files += int(count)
+                self.ui.progressBar.setValue(int((self.current_files / total_files) * 100))
+
+            except:
+
+                print("Unexpected error:", sys.exc_info()[0])
+                print(sys.exc_info()[1])
+
+        print('Progress thread dying...')
+
+
 
     def do_crawl(self, *args):
 
@@ -30,6 +65,7 @@ class Crawler:
         database = args[1]
         root = args[2]
         parent = args[3]
+        comms = args[4]
 
         database = Database(ui)
 
@@ -64,9 +100,11 @@ class Crawler:
 
                 database.create_new_entry(record)
 
+                comms.put(1)
+
                 if entry.is_dir():
                     new_root = root + '/' + name
-                    self.crawl_disk(ui, database, new_root, database.id_count - 1)
+                    self.do_crawl(ui, database, new_root, database.id_count - 1, comms)
 
                 time.sleep(0)
 

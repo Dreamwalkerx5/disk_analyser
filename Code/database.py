@@ -50,8 +50,9 @@ class Database:
 
             else:
 
+                pass
                 # gui.info_label.setText('Database found and a connection made.')
-                print('Database found and opened')
+                # print('Database found and opened')
 
             db.commit()
 
