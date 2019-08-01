@@ -8,6 +8,7 @@ import time
 from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
 from Code.crawler import Crawler
+from Code.crawler2 import Crawler2
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 
@@ -116,13 +117,17 @@ class Gui(QtWidgets.QMainWindow):
         self.clear_database()
 
         total_files = self.file_counter()
-        self.crawler_thread = Crawler()
-        self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root,
-                                       parent=0, total_files=total_files)
+        self.crawler_thread = Crawler2(parent=self, gui=self.ui, total_files=1000,
+                                       root=self.current_root, parent_id=0)
+        self.crawler_thread.start()
 
-        # Wait for crawler to finish and then update display
-        monitor = threading.Thread(target=self.crawler_monitor, args=(self.crawler_thread,), daemon=True)
-        monitor.start()
+        # self.crawler_thread = Crawler()
+        # self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root,
+        #                                parent=0, total_files=total_files)
+        #
+        # # Wait for crawler to finish and then update display
+        # monitor = threading.Thread(target=self.crawler_monitor, args=(self.crawler_thread,), daemon=True)
+        # monitor.start()
 
     def create_view(self):
 
@@ -150,8 +155,15 @@ class Gui(QtWidgets.QMainWindow):
 
     def quit(self):
 
+        if self.crawler_thread.isAlive():
+            print('Killing crawler...')
+            self.crawler_thread.join()
+
         self.close_database()
         app.quit()
+
+    def update_progress_bar(self, progress):
+        self.ui.progressBar.setValue(progress)
 
 
 record = Record(entry_id=0, parent=None, directory=True, name='root', file_type='', size=0,
