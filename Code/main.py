@@ -133,10 +133,10 @@ class Gui(QtWidgets.QMainWindow):
             self.model.appendRow(item)
 
     def quit(self):
-
-        if self.crawler_thread.isAlive():
-            print('Killing crawler...')
-            self.crawler_thread.join()
+        if self.crawler_thread is not None:
+            if self.crawler_thread.isAlive():
+                print('Killing crawler...')
+                self.crawler_thread.join()
 
         self.close_database()
         app.quit()
