@@ -1,3 +1,5 @@
+#  Copyright (c) 2019. Steven Taylor All rights reserved
+
 import sqlite3
 import sys
 import threading

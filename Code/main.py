@@ -1,5 +1,4 @@
-# Disk Analyser v1.0
-# Copyright (c) 2019 Steven Taylor All rights reserved
+#  Copyright (c) 2019. Steven Taylor All rights reserved
 import os
 from datetime import datetime
 import sys
@@ -29,10 +28,6 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.clicked.connect(self.item_selected)
         self.ui.count_button.clicked.connect(self.file_counter)
 
-        # Start clock thread and make it daemon so it shuts down when the app closes
-        self.clock = threading.Thread(target=self.clock_thread, daemon=True)
-        self.clock.start()
-
         # Open sql database
         self.database = Database(self.ui)
 
@@ -41,11 +36,15 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        self.current_root = "C:/Users/steve/PycharmProjects"
         self.current_parent = 0
         self.previous_parent = 0
         self.display_index = []
         self.crawler_thread = None
+
+        # Start clock thread and make it daemon so it shuts down when the app closes
+        self.clock = threading.Thread(target=self.clock_thread, daemon=True)
+        self.clock.start()
 
         # Create initial display
         self.ui.info_label.setText('Welcome to Disk Analyser v1.0')
@@ -67,6 +66,7 @@ class Gui(QtWidgets.QMainWindow):
             time.sleep(1)
 
         self.ui.info_label.setText('Crawling finished.')
+        print('crawling finished')
         self.create_view()
 
     def file_counter(self):

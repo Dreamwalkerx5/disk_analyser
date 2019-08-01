@@ -1,13 +1,14 @@
+#  Copyright (c) 2019. Steven Taylor All rights reserved
+
 import queue
-import sys, time
+import sys
 import threading
+import time
 from datetime import datetime
 from pathlib import Path
 
-from PyQt5 import QtGui
-
-from Code.database import Record
 from Code.database import Database
+from Code.database import Record
 
 
 class Crawler:
@@ -33,7 +34,7 @@ class Crawler:
         self.crawler_thread.start()
 
         self.progress_thread = threading.Thread(target=self.progress_bar, args=(self.comms,
-                                                self.total_files, ),
+                                                                                self.total_files,),
                                                 daemon=True)
         self.progress_thread.start()
 
@@ -56,8 +57,6 @@ class Crawler:
                 print(sys.exc_info()[1])
 
         print('Progress thread dying...')
-
-
 
     def do_crawl(self, *args):
 
@@ -115,12 +114,22 @@ class Crawler:
 
     @staticmethod
     def convert_date(timestamp):
-        d = datetime.utcfromtimestamp(timestamp)
-        formatted_date = d.strftime('%d %b %Y')
-        return formatted_date
+
+        try:
+            d = datetime.utcfromtimestamp(timestamp)
+            formatted_date = d.strftime('%d %b %Y')
+            return formatted_date
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])
 
     @staticmethod
     def convert_time(timestamp):
-        d = datetime.utcfromtimestamp(timestamp)
-        formatted_time = d.strftime('%H:%M:%S')
-        return formatted_time
+
+        try:
+            d = datetime.utcfromtimestamp(timestamp)
+            formatted_time = d.strftime('%H:%M:%S')
+            return formatted_time
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            print(sys.exc_info()[1])

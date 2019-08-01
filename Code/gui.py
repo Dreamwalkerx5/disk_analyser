@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+#  Copyright (c) 2019. Steven Taylor All rights reserved
+
 # Form implementation generated from reading ui file 'C:\Users\steve\PycharmProjects\disk_analyser\code\gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
