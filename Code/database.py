@@ -163,6 +163,13 @@ class Database:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
 
+    @staticmethod
+    def get_current_id():
+        Database.lock.acquire()
+        id = Database.id_count
+        Database.lock.release()
+        return id
+
 
 class Record:
 

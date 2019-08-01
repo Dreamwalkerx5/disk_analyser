@@ -7,7 +7,6 @@ import time
 
 from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
-from Code.crawler import Crawler
 from Code.crawler2 import Crawler2
 
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -37,7 +36,7 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        self.current_root = "C:/Users/steve/PycharmProjects"
+        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
         self.current_parent = 0
         self.previous_parent = 0
         self.display_index = []
@@ -57,19 +56,6 @@ class Gui(QtWidgets.QMainWindow):
             self.ui.time_label.setText(current_time[11:19])
             time.sleep(1)
 
-    def crawler_monitor(self, *args):
-
-        thread = args[0]
-        self.ui.info_label.setText('Crawling disk...')
-
-        while thread.crawler_thread.isAlive():
-
-            time.sleep(1)
-
-        self.ui.info_label.setText('Crawling finished.')
-        print('crawling finished')
-        self.create_view()
-
     def file_counter(self):
 
         try:
@@ -86,11 +72,12 @@ class Gui(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def item_selected(self, index):
 
+        # Get id of selected item
         selection = self.display_index[index.row()]
         if index.row() == 0:
 
-           record = self.database.get_entry(self.current_parent)
-           self.current_parent = record.parent
+            record = self.database.get_entry(self.current_parent)
+            self.current_parent = record.parent
 
         else:
 
@@ -117,17 +104,9 @@ class Gui(QtWidgets.QMainWindow):
         self.clear_database()
 
         total_files = self.file_counter()
-        self.crawler_thread = Crawler2(parent=self, gui=self.ui, total_files=1000,
+        self.crawler_thread = Crawler2(parent=self, gui=self.ui, total_files=total_files,
                                        root=self.current_root, parent_id=0)
         self.crawler_thread.start()
-
-        # self.crawler_thread = Crawler()
-        # self.crawler_thread.crawl_disk(ui=self.ui, database=self.database, root=self.current_root,
-        #                                parent=0, total_files=total_files)
-        #
-        # # Wait for crawler to finish and then update display
-        # monitor = threading.Thread(target=self.crawler_monitor, args=(self.crawler_thread,), daemon=True)
-        # monitor.start()
 
     def create_view(self):
 

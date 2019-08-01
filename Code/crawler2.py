@@ -55,11 +55,11 @@ class Crawler2(threading.Thread):
             self.crawler_monitor.start()
 
             self.gui.info_label.setText('Crawling disk...')
-            self.crawl_directory(self.root)
+            self.crawl_directory(self.root, self.parent_id)
             self.gui.info_label.setText('Finished disk crawl.')
 
             # Update view
-            self.gui.create_view()
+            self.parent.create_view()
         except:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
@@ -68,10 +68,12 @@ class Crawler2(threading.Thread):
         self.stop_request.set()
         super(Crawler2, self).join(timeout)
 
-    def crawl_directory(self, directory):
+    def crawl_directory(self, directory, parent_id):
+        print('New directory...')
         try:
             # Check if thread has been told to stop
             if not self.stop_request.isSet():
+                database = Database(self.gui)
                 entries = Path(directory)
                 for entry in entries.iterdir():
 
@@ -95,21 +97,26 @@ class Crawler2(threading.Thread):
                     accessed = Crawler2.convert_date(info.st_atime) + ' ' + \
                                Crawler2.convert_time(info.st_atime)
 
-                    record = Record(parent=self.parent_id, directory=directory_flag, name=name,
+                    record = Record(parent=parent_id, directory=directory_flag, name=name,
                                     file_type='',
                                     size=file_size, created=created, modified=modified,
                                     accessed=accessed, read_only=False, hidden=False)
 
-                    self.parent.database.create_new_entry(record)
+                    database.create_new_entry(record)
+                    self.files_processed += 1
 
                     if entry.is_dir():
                         new_directory = directory + '/' + name
-                        self.crawl_directory(new_directory)
+                        self.crawl_directory(new_directory, database.get_current_id() - 1)
 
                     time.sleep(0)
 
                     if self.stop_request.isSet():
                         return
+
+            else:
+                return
+
         except:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
