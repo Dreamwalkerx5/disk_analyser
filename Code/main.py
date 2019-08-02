@@ -8,6 +8,7 @@ import time
 from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
 from Code.crawler2 import Crawler2
+from Code.clock import Clock
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 
@@ -36,20 +37,24 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
-        # self.current_root = "C:/Users/steve"
+        # self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        self.current_root = "C:/Users/steve"
         self.current_parent = 0
         self.previous_parent = 0
         self.display_index = []
         self.crawler_thread = None
 
-        # Start clock thread and make it daemon so it shuts down when the app closes
-        self.clock = threading.Thread(target=self.clock_thread, daemon=True)
+        # Start clock thread
+        self.clock = Clock()
+        self.clock.time_signal.connect(self.update_time_label)
         self.clock.start()
 
         # Create initial display
         self.ui.info_label.setText('Welcome to Disk Analyser v1.0')
         self.create_view()
+
+    def update_time_label(self, new_time):
+        self.ui.time_label.setText(new_time)
 
     def clock_thread(self):
         while True:
@@ -112,11 +117,6 @@ class Gui(QtWidgets.QMainWindow):
         self.crawler_thread.progress_signal.connect(self.update_progress_bar)
         self.crawler_thread.start()
 
-        # total_files = self.file_counter()
-        # self.crawler_thread = Crawler2(parent=self, gui=self.ui,
-        #                                root=self.current_root, parent_id=0)
-        # self.crawler_thread.start()
-
     def crawler_finished(self, result):
         self.create_view()
 
@@ -159,6 +159,10 @@ class Gui(QtWidgets.QMainWindow):
             if self.crawler_thread.isRunning():
                 print('Killing crawler...')
                 self.crawler_thread.stop_request = True
+                self.crawler_thread.wait()
+
+        self.clock.stop_request = True
+        self.clock.wait()
 
         self.close_database()
         app.quit()
