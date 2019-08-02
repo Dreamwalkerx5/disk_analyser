@@ -147,10 +147,10 @@ class Gui(QtWidgets.QMainWindow):
             if temp_record.size < 1024:
                 temp_string += pad_string(text=f'{temp_record.size:.2f}B',
                                           length=10, pad_char=' ', back=False)
-            elif temp_record.size < 1048576:
+            elif temp_record.size < 104858:
                 temp_string += pad_string(text=f'{(temp_record.size / 1024):.2f}K',
                                           length=10, pad_char=' ', back=False)
-            elif temp_record.size < 1073741824:
+            elif temp_record.size < 107374183:
                 temp_string += pad_string(text=f'{(temp_record.size / 1048576):.2f}M',
                                           length=10, pad_char=' ', back=False)
             else:
