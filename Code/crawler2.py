@@ -1,6 +1,6 @@
 #  Copyright (c) 2019. Steven Taylor All rights reserved
 import sys
-import threading
+from PyQt5.QtCore import QThread, pyqtSignal
 import time
 from datetime import datetime
 from pathlib import Path
@@ -9,11 +9,14 @@ from Code.database import Record
 from Code.database import Database
 
 
-class Crawler2(threading.Thread):
+class Crawler2(QThread):
     files_processed: int
+    finished_signal = pyqtSignal('PyQt_PyObject')
+    info_signal = pyqtSignal('PyQt_PyObject')
+    progress_signal = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, parent=None, gui=None, root=None, parent_id=0):
-        super(Crawler2, self).__init__()
+        QThread.__init__(self)
 
         self.parent = parent
         self.gui = gui
@@ -21,7 +24,7 @@ class Crawler2(threading.Thread):
         self.total_files = 0
         self.root = root
         self.parent_id = parent_id
-        self.stop_request = threading.Event()
+        self.stop_request = False
         self.crawler_monitor = None
         self.recursion = 0
         self.max_recursion = 0
@@ -29,22 +32,18 @@ class Crawler2(threading.Thread):
     def run(self):
         try:
             # Calculate total files
-            self.gui.info_label.setText('Calculating number of files...')
+            self.info_signal.emit('Calculating number of files...')
             self.total_files = self.parent.file_counter()
 
-            self.gui.info_label.setText('Crawling disk...')
+            self.info_signal.emit('Crawling disk...')
             self.crawl_directory(self.root, self.parent_id)
-            self.gui.info_label.setText('Finished disk crawl.')
+            self.info_signal.emit('Finished disk crawl.')
 
             # Update view
-            self.parent.create_view()
+            self.finished_signal.emit(0)
         except:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
-
-    def join(self, timeout=None):
-        self.stop_request.set()
-        super(Crawler2, self).join(timeout)
 
     def crawl_directory(self, directory, parent_id):
         self.update_info()
@@ -54,7 +53,7 @@ class Crawler2(threading.Thread):
 
         try:
             # Check if thread has been told to stop
-            if not self.stop_request.isSet():
+            if not self.stop_request:
                 database = Database(self.gui)
                 entries = Path(directory)
                 for entry in entries.iterdir():
@@ -94,7 +93,7 @@ class Crawler2(threading.Thread):
 
                     time.sleep(0)
 
-                    if self.stop_request.isSet():
+                    if self.stop_request:
                         return
 
                 self.recursion -= 1
@@ -109,10 +108,8 @@ class Crawler2(threading.Thread):
 
     def update_info(self):
 
-        self.gui.info_label.setText('Crawling disk... Current thread: ' +
-                                    str(threading.get_ident()) +
-                                    ' Max recursion: ' + str(self.max_recursion) +
-                                    ' Current recursion: ' + str(self.recursion))
+        self.info_signal.emit('Crawling disk... Max recursion: ' + str(self.max_recursion) +
+                              ' Current recursion: ' + str(self.recursion))
 
     @staticmethod
     def convert_date(timestamp):

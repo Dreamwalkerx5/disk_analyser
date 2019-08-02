@@ -36,8 +36,8 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        # self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
-        self.current_root = "C:/Users/steve"
+        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        # self.current_root = "C:/Users/steve"
         self.current_parent = 0
         self.previous_parent = 0
         self.display_index = []
@@ -103,11 +103,22 @@ class Gui(QtWidgets.QMainWindow):
     def crawler(self):
 
         self.clear_database()
-
-        # total_files = self.file_counter()
+        # Create crawler thread
         self.crawler_thread = Crawler2(parent=self, gui=self.ui,
                                        root=self.current_root, parent_id=0)
+        # Connect finished signal to our method
+        self.crawler_thread.finished_signal.connect(self.crawler_finished)
+        self.crawler_thread.info_signal.connect(self.update_info)
+        self.crawler_thread.progress_signal.connect(self.update_progress_bar)
         self.crawler_thread.start()
+
+        # total_files = self.file_counter()
+        # self.crawler_thread = Crawler2(parent=self, gui=self.ui,
+        #                                root=self.current_root, parent_id=0)
+        # self.crawler_thread.start()
+
+    def crawler_finished(self, result):
+        self.create_view()
 
     def create_view(self):
 
@@ -145,15 +156,18 @@ class Gui(QtWidgets.QMainWindow):
 
     def quit(self):
         if self.crawler_thread is not None:
-            if self.crawler_thread.isAlive():
+            if self.crawler_thread.isRunning():
                 print('Killing crawler...')
-                self.crawler_thread.join()
+                self.crawler_thread.stop_request = True
 
         self.close_database()
         app.quit()
 
     def update_progress_bar(self, progress):
         self.ui.progressBar.setValue(progress)
+
+    def update_info(self, text):
+        self.ui.info_label.setText(text)
 
 
 record = Record(entry_id=0, parent=None, directory=True, name='root', file_type='', size=0,
