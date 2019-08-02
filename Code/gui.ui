@@ -124,6 +124,14 @@
       <height>591</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Fixedsys</family>
+      <pointsize>12</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
     <property name="alternatingRowColors">
      <bool>false</bool>
     </property>

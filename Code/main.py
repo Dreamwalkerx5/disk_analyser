@@ -9,6 +9,7 @@ from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
 from Code.crawler2 import Crawler2
 from Code.clock import Clock
+from Code.utils import pad_string
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 
@@ -141,14 +142,20 @@ class Gui(QtWidgets.QMainWindow):
             else:
                 temp_string += ' '
 
+            temp_string += pad_string(text=temp_record.name, length=50, pad_char='.', back=True) + ' '
+
             if temp_record.size < 1024:
-                temp_string += f'{temp_record.name}\t\t{temp_record.size}B'
+                temp_string += pad_string(text=f'{temp_record.size:.2f}B',
+                                          length=10, pad_char=' ', back=False)
             elif temp_record.size < 1048576:
-                temp_string += f'{temp_record.name}\t\t{(temp_record.size / 1024)}K'
+                temp_string += pad_string(text=f'{(temp_record.size / 1024):.2f}K',
+                                          length=10, pad_char=' ', back=False)
             elif temp_record.size < 1073741824:
-                temp_string += f'{temp_record.name}\t\t{temp_record.size / 1048576}M'
+                temp_string += pad_string(text=f'{(temp_record.size / 1048576):.2f}M',
+                                          length=10, pad_char=' ', back=False)
             else:
-                temp_string += f'{temp_record.name}\t\t{temp_record.size / 1073741824}G'
+                temp_string += pad_string(text=f'{(temp_record.size / 1073741824):.2f}G',
+                                          length=10, pad_char=' ', back=False)
 
             self.display_index.append(temp_record.entry_id)
             item = QtGui.QStandardItem(temp_string)
