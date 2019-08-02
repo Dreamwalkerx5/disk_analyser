@@ -11,6 +11,7 @@ from Code.database import Database
 
 class Crawler2(QThread):
     files_processed: int
+    # Connect signals to correct GUI methods
     finished_signal = pyqtSignal('PyQt_PyObject')
     info_signal = pyqtSignal('PyQt_PyObject')
     progress_signal = pyqtSignal('PyQt_PyObject')
@@ -25,7 +26,6 @@ class Crawler2(QThread):
         self.root = root
         self.parent_id = parent_id
         self.stop_request = False
-        self.crawler_monitor = None
         self.recursion = 0
         self.max_recursion = 0
 
@@ -85,7 +85,7 @@ class Crawler2(QThread):
 
                     database.create_new_entry(record)
                     self.files_processed += 1
-                    self.parent.update_progress_bar(int((self.files_processed / self.total_files) * 100))
+                    self.progress_signal.emit(int((self.files_processed / self.total_files) * 100))
 
                     if entry.is_dir():
                         new_directory = directory + '/' + name
