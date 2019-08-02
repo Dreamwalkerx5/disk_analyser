@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019. Steven Taylor All rights reserved
-
 # Form implementation generated from reading ui file 'C:\Users\steve\PycharmProjects\disk_analyser\code\gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
@@ -24,7 +22,7 @@ class Ui_mainWindow(object):
         self.info_label.setStyleSheet("background-color:white")
         self.info_label.setFrameShape(QtWidgets.QFrame.Box)
         self.info_label.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.info_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.info_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.info_label.setObjectName("info_label")
         self.time_label = QtWidgets.QLabel(self.centralwidget)
         self.time_label.setGeometry(QtCore.QRect(800, 10, 121, 51))

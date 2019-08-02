@@ -1,5 +1,4 @@
 #  Copyright (c) 2019. Steven Taylor All rights reserved
-import queue
 import sys
 import threading
 import time
@@ -10,49 +9,28 @@ from Code.database import Record
 from Code.database import Database
 
 
-def crawler_monitor(*args):
-    parent = args[0]
-    gui = args[1]
-    total_files = args[2]
-
-    while parent.total_files > parent.files_processed:
-
-        try:
-
-            gui.update_progress_bar(int((parent.files_processed / parent.total_files) * 100))
-            time.sleep(0.1)
-
-        except:
-
-            print("Unexpected error:", sys.exc_info()[0])
-            print(sys.exc_info()[1])
-
-    print('Progress thread dying...')
-
-
 class Crawler2(threading.Thread):
     files_processed: int
 
-    def __init__(self, parent=None, gui=None, total_files=0, root=None, parent_id=0):
+    def __init__(self, parent=None, gui=None, root=None, parent_id=0):
         super(Crawler2, self).__init__()
 
         self.parent = parent
         self.gui = gui
-        self.total_files = total_files
+        self.files_processed = 0
+        self.total_files = 0
         self.root = root
         self.parent_id = parent_id
-        self.files_processed = 0
         self.stop_request = threading.Event()
         self.crawler_monitor = None
+        self.recursion = 0
+        self.max_recursion = 0
 
     def run(self):
         try:
-            # Start crawler monitor thread
-            self.crawler_monitor = threading.Thread(target=crawler_monitor,
-                                                    args=(self, self.parent,
-                                                          self.total_files,),
-                                                    daemon=True)
-            self.crawler_monitor.start()
+            # Calculate total files
+            self.gui.info_label.setText('Calculating number of files...')
+            self.total_files = self.parent.file_counter()
 
             self.gui.info_label.setText('Crawling disk...')
             self.crawl_directory(self.root, self.parent_id)
@@ -69,7 +47,11 @@ class Crawler2(threading.Thread):
         super(Crawler2, self).join(timeout)
 
     def crawl_directory(self, directory, parent_id):
-        print('New directory...')
+        self.update_info()
+        self.recursion += 1
+        if self.recursion > self.max_recursion:
+            self.max_recursion = self.recursion
+
         try:
             # Check if thread has been told to stop
             if not self.stop_request.isSet():
@@ -104,6 +86,7 @@ class Crawler2(threading.Thread):
 
                     database.create_new_entry(record)
                     self.files_processed += 1
+                    self.parent.update_progress_bar(int((self.files_processed / self.total_files) * 100))
 
                     if entry.is_dir():
                         new_directory = directory + '/' + name
@@ -114,12 +97,22 @@ class Crawler2(threading.Thread):
                     if self.stop_request.isSet():
                         return
 
+                self.recursion -= 1
+                self.update_info()
+
             else:
                 return
 
         except:
             print("Unexpected error:", sys.exc_info()[0])
             print(sys.exc_info()[1])
+
+    def update_info(self):
+
+        self.gui.info_label.setText('Crawling disk... Current thread: ' +
+                                    str(threading.get_ident()) +
+                                    ' Max recursion: ' + str(self.max_recursion) +
+                                    ' Current recursion: ' + str(self.recursion))
 
     @staticmethod
     def convert_date(timestamp):

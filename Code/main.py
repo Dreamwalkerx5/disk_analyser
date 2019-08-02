@@ -36,7 +36,8 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        # self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        self.current_root = "C:/Users/steve"
         self.current_parent = 0
         self.previous_parent = 0
         self.display_index = []
@@ -103,8 +104,8 @@ class Gui(QtWidgets.QMainWindow):
 
         self.clear_database()
 
-        total_files = self.file_counter()
-        self.crawler_thread = Crawler2(parent=self, gui=self.ui, total_files=total_files,
+        # total_files = self.file_counter()
+        self.crawler_thread = Crawler2(parent=self, gui=self.ui,
                                        root=self.current_root, parent_id=0)
         self.crawler_thread.start()
 
@@ -123,10 +124,20 @@ class Gui(QtWidgets.QMainWindow):
         for temp_record in records:
 
             temp_string = ''
-            temp_string += f'{temp_record.parent}  '
+            # temp_string += f'{temp_record.parent}  '
             if temp_record.directory:
                 temp_string += '*'
-            temp_string += f'{temp_record.name}\t\t{(temp_record.size / 1024)}K'
+            else:
+                temp_string += ' '
+
+            if temp_record.size < 1024:
+                temp_string += f'{temp_record.name}\t\t{temp_record.size}B'
+            elif temp_record.size < 1048576:
+                temp_string += f'{temp_record.name}\t\t{(temp_record.size / 1024)}K'
+            elif temp_record.size < 1073741824:
+                temp_string += f'{temp_record.name}\t\t{temp_record.size / 1048576}M'
+            else:
+                temp_string += f'{temp_record.name}\t\t{temp_record.size / 1073741824}G'
 
             self.display_index.append(temp_record.entry_id)
             item = QtGui.QStandardItem(temp_string)
