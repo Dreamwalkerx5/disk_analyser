@@ -153,7 +153,8 @@ class Gui(QtWidgets.QMainWindow):
             else:
                 temp_string += ' '
 
-            temp_string += pad_string(text=temp_record.name, length=50, pad_char='.', back=True) + ' '
+            temp_string += pad_string(text=temp_record.name, length=50, pad_char=' ', back=True) + ' '
+            temp_string += pad_string(text=temp_record.file_type, length=4, pad_char=' ', back=True) + ' '
 
             if temp_record.size < 1024:
                 temp_string += pad_string(text=f'{temp_record.size:.2f}B',

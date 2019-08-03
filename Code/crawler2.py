@@ -60,7 +60,8 @@ class Crawler2(QThread):
                 entries = Path(directory)
                 for entry in entries.iterdir():
 
-                    name = entry.name
+                    name = entry.name[0:len(entry.name) - len(entry.suffix)]
+                    suffix = entry.suffix
                     info = entry.stat()
                     if entry.is_dir():
 
@@ -81,7 +82,7 @@ class Crawler2(QThread):
                                Crawler2.convert_time(info.st_atime)
 
                     record = Record(parent=parent_id, directory=directory_flag, name=name,
-                                    file_type='',
+                                    file_type=suffix,
                                     size=file_size, created=created, modified=modified,
                                     accessed=accessed, read_only=False, hidden=False)
 
@@ -90,7 +91,7 @@ class Crawler2(QThread):
                     self.progress_signal.emit(int((self.files_processed / self.total_files) * 100))
 
                     if entry.is_dir():
-                        new_directory = directory + '/' + name
+                        new_directory = directory + '/' + entry.name
                         self.crawl_directory(new_directory, database.get_current_id() - 1)
 
                     time.sleep(0)
