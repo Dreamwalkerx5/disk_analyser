@@ -3,7 +3,7 @@
 import time
 from datetime import datetime
 
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 
 
 class Clock(QThread):
@@ -22,6 +22,7 @@ class Clock(QThread):
             self.time_signal.emit(current_time[11:19])
             time.sleep(1)
 
+    @pyqtSlot()
     def kill(self):
         print('Clock thread dying...')
         self.stop_request = True

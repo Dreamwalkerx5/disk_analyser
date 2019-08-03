@@ -6,6 +6,7 @@ import threading
 import time
 
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QFileDialog
 
 from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
@@ -42,7 +43,8 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        # self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        self.current_root = "C:/Users/steve/PycharmProjects"
         # self.current_root = "C:/Users/steve"
         self.current_parent = 0
         self.previous_parent = 0
@@ -112,6 +114,8 @@ class Gui(QtWidgets.QMainWindow):
         self.create_view()
 
     def crawler(self):
+
+        self.current_root = self.get_directory()
 
         self.clear_database()
         # Create crawler thread
@@ -185,6 +189,11 @@ class Gui(QtWidgets.QMainWindow):
 
     def update_info(self, text):
         self.ui.info_label.setText(text)
+
+    def get_directory(self):
+        # fname = QFileDialog.getOpenFileName(self, 'Select a directory to crawl', 'c://')
+        fname = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        return fname
 
 
 record = Record(entry_id=0, parent=None, directory=True, name='root', file_type='', size=0,

@@ -110,8 +110,9 @@ class Crawler2(QThread):
 
     def update_info(self):
 
-        self.info_signal.emit('Crawling disk... Max recursion: ' + str(self.max_recursion) +
-                              ' Current recursion: ' + str(self.recursion))
+        self.info_signal.emit(f'Crawling disk. Done {self.files_processed} of {self.total_files}  '
+                              f'Max recursion: {self.max_recursion}  '
+                              f'Current recursion: {self.recursion}')
 
     def kill(self):
         print('Crawler thread dying...')
