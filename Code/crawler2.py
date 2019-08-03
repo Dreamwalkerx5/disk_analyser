@@ -16,7 +16,7 @@ class Crawler2(QThread):
     info_signal = pyqtSignal('PyQt_PyObject')
     progress_signal = pyqtSignal('PyQt_PyObject')
 
-    def __init__(self, parent=None, gui=None, root=None, parent_id=0):
+    def __init__(self, parent=None, gui=None, root=None, parent_id=0, kill_signal=None):
         QThread.__init__(self)
 
         self.parent = parent
@@ -28,6 +28,8 @@ class Crawler2(QThread):
         self.stop_request = False
         self.recursion = 0
         self.max_recursion = 0
+        self.kill_signal = kill_signal
+        self.kill_signal.connect(self.kill)
 
     def run(self):
         try:
@@ -110,6 +112,10 @@ class Crawler2(QThread):
 
         self.info_signal.emit('Crawling disk... Max recursion: ' + str(self.max_recursion) +
                               ' Current recursion: ' + str(self.recursion))
+
+    def kill(self):
+        print('Crawler thread dying...')
+        self.stop_request = True
 
     @staticmethod
     def convert_date(timestamp):

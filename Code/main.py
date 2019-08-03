@@ -5,6 +5,8 @@ import sys
 import threading
 import time
 
+from PyQt5.QtCore import pyqtSignal
+
 from Code.gui import Ui_mainWindow
 from Code.database import Database, Record
 from Code.crawler2 import Crawler2
@@ -15,6 +17,8 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 
 class Gui(QtWidgets.QMainWindow):
+    clock_kill_signal = pyqtSignal('PyQt_PyObject')
+    crawler_kill_signal = pyqtSignal('PyQt_PyObject')
 
     def __init__(self):
         super(Gui, self).__init__()
@@ -38,16 +42,17 @@ class Gui(QtWidgets.QMainWindow):
         self.ui.listView.setModel(self.model)
 
         # Set up some variables
-        # self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
-        self.current_root = "C:/Users/steve"
+        self.current_root = "C:/Users/steve/PycharmProjects/disk_analyser"
+        # self.current_root = "C:/Users/steve"
         self.current_parent = 0
         self.previous_parent = 0
         self.display_index = []
         self.crawler_thread = None
 
         # Start clock thread
-        self.clock = Clock()
+        self.clock = Clock(self.clock_kill_signal)
         self.clock.time_signal.connect(self.update_time_label)
+
         self.clock.start()
 
         # Create initial display
@@ -111,11 +116,13 @@ class Gui(QtWidgets.QMainWindow):
         self.clear_database()
         # Create crawler thread
         self.crawler_thread = Crawler2(parent=self, gui=self.ui,
-                                       root=self.current_root, parent_id=0)
+                                       root=self.current_root, parent_id=0,
+                                       kill_signal=self.crawler_kill_signal)
         # Connect finished signal to our method
         self.crawler_thread.finished_signal.connect(self.crawler_finished)
         self.crawler_thread.info_signal.connect(self.update_info)
         self.crawler_thread.progress_signal.connect(self.update_progress_bar)
+
         self.crawler_thread.start()
 
     def crawler_finished(self, result):
@@ -164,11 +171,10 @@ class Gui(QtWidgets.QMainWindow):
     def quit(self):
         if self.crawler_thread is not None:
             if self.crawler_thread.isRunning():
-                print('Killing crawler...')
-                self.crawler_thread.stop_request = True
+                self.crawler_kill_signal.emit(0)
                 self.crawler_thread.wait()
 
-        self.clock.stop_request = True
+        self.clock_kill_signal.emit(0)
         self.clock.wait()
 
         self.close_database()
