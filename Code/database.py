@@ -7,7 +7,7 @@ import threading
 
 class Database:
 
-    id_count = 0
+    id_count = 1
     lock = threading.Lock()
 
     def __init__(self, gui):
@@ -24,7 +24,7 @@ class Database:
             self.db.commit()
 
             # Create new database
-            Database.id_count = 0
+            Database.id_count = 1
             Database.create_new_database(self.db)
             self.gui.info_label.setText('Database has been cleared.')
             print('Database cleared')

@@ -100,7 +100,7 @@ class Gui(QtWidgets.QMainWindow):
             if record.directory:
 
                 self.current_parent = selection
-                print(record.directory)
+                # print(f'Directory {selection}')
 
         self.create_view()
 
