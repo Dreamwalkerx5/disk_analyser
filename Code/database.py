@@ -145,7 +145,7 @@ class Database:
             records = []
             c = self.db.cursor()
 
-            c.execute('SELECT * FROM DiskTree WHERE Parent= ? ORDER BY Id', (parent,))
+            c.execute('SELECT * FROM DiskTree WHERE Parent= ? ORDER BY Directory DESC', (parent,))
 
             for row in c:
 

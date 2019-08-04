@@ -6,6 +6,7 @@ import threading
 import time
 
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QFileDialog
 
 from Code.gui import Ui_mainWindow
@@ -90,8 +91,10 @@ class Gui(QtWidgets.QMainWindow):
         selection = self.display_index[index.row()]
         if index.row() == 0:
 
-            record = self.database.get_entry(self.current_parent)
-            self.current_parent = record.parent
+            if self.current_parent != 0:
+                record = self.database.get_entry(self.current_parent)
+
+                self.current_parent = record.parent
 
         else:
 
@@ -171,6 +174,13 @@ class Gui(QtWidgets.QMainWindow):
 
             self.display_index.append(temp_record.entry_id)
             item = QtGui.QStandardItem(temp_string)
+
+            # Change colour if item is a directory
+            if temp_record.directory:
+                item.setForeground(QtGui.QBrush(QColor(200, 0, 0)))
+            else:
+                item.setForeground(QtGui.QBrush(QColor(0, 155, 0)))
+
             self.model.appendRow(item)
 
     def quit(self):
